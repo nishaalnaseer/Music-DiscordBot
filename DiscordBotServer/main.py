@@ -283,6 +283,7 @@ class Bot(object):
             self.paused = False
             self.update_duration()
             # print("Actual pause = ", self.paused)  # debugging
+            send_clients(f"PLAY {option}")
 
             return f"Now playing: '{SONGS[option]}' - at the head of playlist"
         else:
