@@ -9,7 +9,7 @@ import mutagen
 import math
 from multiprocessing import Process
 
-server_version = "0.0.3"
+server_version = "0.0.4"
 
 
 # TODO add comments
@@ -40,13 +40,19 @@ def indexing(path):
     index = {}
     songs = []
 
-    def search_folders(folder_path):
+    if os.name == "nt":
+        slash = "\\"
+    else:
+        slash = "/"
+
+    num = 0
+
+    def search_folders(folder_path, num):
         items = os.listdir(folder_path)
         folders = []
-        num = 0
         for ii in range(len(items)):
             file = items[ii]
-            file_path = f"{folder_path}\\{file}"
+            file_path = f"{folder_path}{slash}{file}"
             if os.path.isdir(file_path):
                 folders.append(file_path)
                 continue
@@ -58,9 +64,11 @@ def indexing(path):
                 num += 1
 
         for folder in folders:
-            search_folders(folder)
+            num = search_folders(folder, num)
 
-    search_folders(path)
+        return num
+
+    search_folders(path, 0)
     return [index, songs]
 
 
@@ -73,13 +81,11 @@ def list_playlist(args):
 
 def return_song_description(array):
     string = ""
-    for index, value in enumerate(array):
-        file_path = SONG_MAP[value]
+    for index, key in enumerate(array):
+        file_path = SONG_MAP[key]
         file = mutagen.File(file_path)
         duration = math.ceil(file.info.length)
-        string += f"{index}. {SONGS[value]} - {secs_to_mins(duration)}\n"
-        print(string)
-
+        string += f"{index}. {SONGS[key]} - {secs_to_mins(duration)}\n"
     return string
 
 
@@ -205,11 +211,8 @@ class Bot(object):
 
         if args[0] == "help":
             return print_help(args)
-        try:
-            func = self.arg0_responses[args[0]]
-            response = func(args)
-        except KeyError:
-            return "Type 'help' to display for a guide"
+        func = self.arg0_responses[args[0]]
+        response = func(args)
 
         self.searched = args[0] == "seek" or (args[0] == "saw " and self.searched)
         self.listed = args[0] == "list" or (args[0] == "remv" and self.listed)
@@ -242,11 +245,7 @@ class Bot(object):
             for start in range(len(song)):
                 if song[start:lenght + start] == text:
                     self.options.append(index)
-
-        print(text)
         string = return_song_description(self.options)
-        print(string)
-        print("ok")
 
         if string == "":
             return "No track that matches your description"
