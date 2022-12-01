@@ -18,13 +18,20 @@ def indexing(path):
     index = {}
     songs = []
 
+    if os.name == "nt":
+        #  for windows
+        slash = '\\'
+    else:
+        #  for linux
+        slash = '/'
+
     def search_folders(folder_path):
         items = os.listdir(folder_path)
         folders = []
         num = 0
         for ii in range(len(items)):
             file = items[ii]
-            file_path = f"{folder_path}\\{file}"
+            file_path = f"{folder_path}{slash}{file}"
             if os.path.isdir(file_path):
                 folders.append(file_path)
                 continue
