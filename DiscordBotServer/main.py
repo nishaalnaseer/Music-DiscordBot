@@ -350,7 +350,7 @@ class Bot(object):
             self.start = time.time()
             update_file()
             send_clients(f"PLAY {PLAYLIST[0]}")
-            return f"Now playing '{song}' - {secs_to_mins(self.time_elapsed)} / " \
+            return f"Now playing '{song}' - {secs_to_mins(self.time_elapsed - self.total_pause_duration)} / " \
                    f"{secs_to_mins(self.duration)} "
 
         if self.ever_paused:
